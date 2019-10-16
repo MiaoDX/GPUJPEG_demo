@@ -1,4 +1,4 @@
-# Faster JPEG decode processing
+# Faster JPEG encode processing
 
 *OpenCV default JPEG compression is way too slow, we need one faster implement*
 

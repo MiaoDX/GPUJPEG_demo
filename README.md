@@ -1,16 +1,36 @@
-# Demo usage of [CESNET/GPUJPEG](https://github.com/CESNET/GPUJPEG)
+# Faster JPEG decode processing
+
+*OpenCV default JPEG compression is way too slow, we need one faster implement*
+
+Time on Xavier with `1280x720` images
+
+| Method | Time ms(100 iterations) |
+| :-----| ----: | 
+| OpenCV | 2411  |
+| GPUJPEG | 160  |
+
+
+## Optional choices:
+
+* [CESNET/GPUJPEG](https://github.com/CESNET/GPUJPEG.git) 
+  - Current choice, open-source, quick enough
+* [Fastvideo](https://www.fastcompression.com/)
+  - Close-sourced SDK, many other functions
+  - Watermark with trial version
+* nvJPEG
+  - Not available for Xavier currently (20191016)
+
+## Usage
 
 ``` vi
-# Build and install GPUJPEG first (cmake way)
+# Build and install GPUJPEG first (CMake)
 git clone https://github.com/CESNET/GPUJPEG.git
 ...
 
-
-# Build this demo (cmake way)
-# Please change the OpenCV (and libgpujpeg) pathes
+# Build this demo (CMake)
+# Please change the OpenCV (and libgpujpeg) path
 git clone https://github.com/MiaoDX/GPUJPEG_demo.git
 ...
-
 
 # Run with images
 ./build/cuda_jpeg_encode images/a.png

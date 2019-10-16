@@ -4,21 +4,10 @@
 
 Time on Xavier with `1280x720` images
 
-| Method | Time ms(100 iterations) |
-| :-----| ----: | 
+| Method | Time ms (100 iterations) |
+| :-----| :---- | 
 | OpenCV | 2411  |
 | GPUJPEG | 160  |
-
-
-## Optional choices:
-
-* [CESNET/GPUJPEG](https://github.com/CESNET/GPUJPEG.git) 
-  - Current choice, open-source, quick enough
-* [Fastvideo](https://www.fastcompression.com/)
-  - Close-sourced SDK, many other functions
-  - Watermark with trial version
-* nvJPEG
-  - Not available for Xavier currently (20191016)
 
 ## Usage
 
@@ -36,6 +25,16 @@ git clone https://github.com/MiaoDX/GPUJPEG_demo.git
 ./build/cuda_jpeg_encode images/a.png
 ./build/cuda_jpeg_encode images/b.jpg
 ```
+
+## Optional choices
+
+* [CESNET/GPUJPEG](https://github.com/CESNET/GPUJPEG.git) 
+  - Current choice, open-source, quick enough
+* [Fastvideo](https://www.fastcompression.com/)
+  - Close-sourced SDK, many other functions
+  - Watermark with trial version
+* nvJPEG
+  - Not available for Xavier currently (20191016)
 
 ## TODO
 

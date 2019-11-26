@@ -21,7 +21,6 @@ public:
     int encode(cv::Mat ocv_img, std::vector<uint8_t> &buf){
         gpujpeg_encoder_input_set_image(&encoder_input, ocv_img.data);
 
-        uint8_t* image_compressed = NULL;
         int image_compressed_size = 0;
 
 
@@ -40,8 +39,7 @@ public:
         return 0;
     }
 
-    bool init(){
-
+    FastEncoder(int width = 1280, int height = 720, int device_id = 0){
 
         gpujpeg_set_default_parameters(&param);
         gpujpeg_image_set_default_parameters(&param_image);
@@ -51,8 +49,8 @@ public:
 
         int component_range = 0;
 
-        param_image.width = 1280;
-        param_image.height = 720;
+        param_image.width = width;
+        param_image.height = height;
 
         param_image.color_space = GPUJPEG_RGB;
         param_image.comp_count = 3;
@@ -61,27 +59,24 @@ public:
         param.quality = 95;
         param.restart_interval = 32;
 
-        int device_id = 0;
         int flags = GPUJPEG_VERBOSE;
-        if ( gpujpeg_init_device(device_id, flags) != 0 )
-            return -1;
-
+        if ( gpujpeg_init_device(device_id, flags) != 0 ) {
+            fprintf(stderr, "Init on gpu device error\n");
+            
+        }
 
         if (param_image.width <= 0 || param_image.height <= 0) {
             fprintf(stderr, "Image dimensions must be set to nonzero values!\n");
-            return -1;
         }
 
         encoder = gpujpeg_encoder_create(NULL);
         if ( encoder == NULL ) {
             fprintf(stderr, "Failed to create encoder!\n");
-            return -1;
         }
-
-        return 0;
     }
 
     ~FastEncoder(){
+        gpujpeg_image_destroy(image_compressed);
         gpujpeg_encoder_destroy(encoder);
     }
 
@@ -90,6 +85,7 @@ private:
     struct gpujpeg_parameters param;
     struct gpujpeg_image_parameters param_image;
     struct gpujpeg_encoder* encoder = NULL;
+    uint8_t* image_compressed = NULL;
     struct gpujpeg_encoder_input encoder_input;
 };
 
@@ -97,7 +93,7 @@ int
 main(int argc, char *argv[])
 {
 
-    if ( argc < 1 ) {
+    if ( argc < 2 ) {
         fprintf(stderr, "Please supply source image filename!\n");
         return -1;
     }
@@ -108,7 +104,6 @@ main(int argc, char *argv[])
     ocv_img_gpu.upload(ocv_img);
 
     FastEncoder fastEncoder;
-    fastEncoder.init();
 
     int iterate = 100;
 
@@ -119,14 +114,11 @@ main(int argc, char *argv[])
         fastEncoder.encode(ocv_img, buf);
     }   
     auto end = std::chrono::steady_clock::now();
-    std::cout << "Elapsed time in milliseconds : " 
+    std::cout << "GPU encode time in milliseconds : " 
         << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
         << " ms" << std::endl;
     cv::Mat img_decode=cv::imdecode(cv::Mat(buf), CV_LOAD_IMAGE_COLOR);
     cv::imwrite("save_fast_result.jpg", img_decode);
- 
-
-
 
     start = std::chrono::steady_clock::now();
     std::vector<uint8_t> buf_ocv;
@@ -134,7 +126,7 @@ main(int argc, char *argv[])
         cv::imencode( ".jpg", ocv_img, buf_ocv);
     }   
     end = std::chrono::steady_clock::now();
-    std::cout << "Elapsed time in milliseconds : " 
+    std::cout << "CV2 encode time in milliseconds : " 
         << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
         << " ms" << std::endl;
     img_decode=cv::imdecode(cv::Mat(buf), CV_LOAD_IMAGE_COLOR);

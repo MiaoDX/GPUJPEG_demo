@@ -22,8 +22,8 @@ git clone https://github.com/MiaoDX/GPUJPEG_demo.git
 ...
 
 # Run with images
-./build/cuda_jpeg_encode images/a.png
-./build/cuda_jpeg_encode images/b.jpg
+./build/encode images/a.png
+./build/encode images/b.jpg
 ```
 
 ## Optional choices

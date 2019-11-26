@@ -18,5 +18,5 @@ include_directories( /usr/local/include/libgpujpeg/ )
 link_directories( /usr/local/lib )
 
 #add_executable( ${PROJECT_NAME} demo.cpp )
-cuda_add_executable( ${PROJECT_NAME} demo.cpp )
-target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} gpujpeg)
+cuda_add_executable( encode encode.cpp )
+target_link_libraries( encode ${OpenCV_LIBS} gpujpeg)

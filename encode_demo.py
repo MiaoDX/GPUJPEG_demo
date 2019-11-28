@@ -12,17 +12,18 @@ import numpy as np
 sys.path.append('./build')
 import GPUJPEG_Encoder
 
-# in_f='./images/a.png'
-if len(sys.argv) < 2:
-    print('Usage: python3 encode_demo.py <input_image_file>')
+if len(sys.argv) < 3:
+    print('Usage: python3 encode_demo.py <input_image_file> <restart_interval>')
     exit()
 in_f = sys.argv[1]
 
 im = cv2.imread(in_f)
 
+restart_interval = int(sys.argv[2])
+
 gpu_encoder = GPUJPEG_Encoder.Encoder(height=720,
                                       width=1280,
-                                      restart_interval=16)
+                                      restart_interval=restart_interval)
 
 N = 100
 
@@ -46,6 +47,3 @@ buf_npy = np.array(buf_npy)
 # im_b = cv2.imdecode(buf_npy, cv2.IMREAD_COLOR)
 im_b = cv2.imdecode(buf_npy, cv2.IMREAD_UNCHANGED)
 cv2.imwrite('encode_cv2_py.jpg', im_b)
-
-# print(im_b.shape)
-# print(im_b2.shape)

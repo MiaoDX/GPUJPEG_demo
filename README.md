@@ -1,21 +1,37 @@
-# Faster JPEG encode processing
+# Faster JPEG encode/decode processing
 
 *OpenCV default JPEG compression is way too slow, we need one faster implement*
 
-Time on Xavier with `1280x720` images
+
+## Benchmark
+
+
+* `restart_interval` matters, please tweak it for your specific image size. (8, 16, 32) can be used for `1280x720`. All test below use `16`.
+
+Time on Xavier with `1280x720` images, *Note, the speed varies for different running, however, the speedup ratio is still satisfying.*
+
+``` bash
+./demo_benchmark.sh
+```
+
+C++ version:
 
 | Method | Time ms (100 iterations) |
 | :-----| :---- | 
-| OpenCV | 2390  |
-| GPUJPEG | 230  |
+| OpenCV Encode | 2369  |
+| GPUJPEG Encode | 245  |
+| OpenCV Decode | 1884  |
+| GPUJPEG Decode | 429  |
 
-For python version, with `restart_interval=16`. Note, the OpenCV python is faster than above result.
+
+Python version:
 
 | Method | Time ms (100 iterations) |
 | :-----| :---- | 
-| OpenCV | 799  |
-| GPUJPEG only | 221  |
-| GPUJPEG (py::bytes) | 286  |
+| OpenCV Encode | 791  |
+| GPUJPEG Encode | 242  |
+| OpenCV Decode | 1269  |
+| GPUJPEG Decode | 492  |
 
 ## Usage
 
@@ -29,9 +45,8 @@ git clone https://github.com/CESNET/GPUJPEG.git
 git clone https://github.com/MiaoDX/GPUJPEG_demo.git
 ...
 
-# Run with images
-./build/encode images/a.png
-./build/encode images/b.jpg
+
+./demo_benchmark.sh
 ```
 
 ## Optional choices

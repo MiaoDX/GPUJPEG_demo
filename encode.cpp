@@ -8,7 +8,7 @@
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    fprintf(stderr, "Please supply source image filename!\n");
+    fprintf(stderr, "Usage: command <file> <restart_interval>!\n");
     return -1;
   }
 
@@ -17,7 +17,8 @@ int main(int argc, char *argv[]) {
   // cv::cuda::GpuMat ocv_img_gpu;
   // ocv_img_gpu.upload(ocv_img);
 
-  FastEncoder fastEncoder;
+//   FastEncoder(int width = 1280, int height = 720, int restart_interval = 16, int device_id = 0) {
+  FastEncoder fastEncoder(ocv_img.size().width, ocv_img.size().height, atoi(argv[2]));
 
   int iterate = 100;
 

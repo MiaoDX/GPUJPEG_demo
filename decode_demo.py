@@ -12,8 +12,8 @@ sys.path.append('./build')
 import GPUJPEG_Encoder
 import GPUJPEG_Decoder
 
-if len(sys.argv) < 2:
-    print('Usage: python3 encode_demo.py <input_image_file>')
+if len(sys.argv) < 3:
+    print('Usage: python3 encode_demo.py <input_image_file> <restart_interval>')
     exit()
 
 in_f = sys.argv[1]
@@ -21,8 +21,9 @@ in_f = sys.argv[1]
 im = cv2.imread(in_f)
 
 height, width = im.shape[:2]
-restart_interval_encode = 8
-restart_interval_decode = 8
+restart_interval = int(sys.argv[2])
+restart_interval_encode = restart_interval
+restart_interval_decode = restart_interval
 
 gpu_encoder = GPUJPEG_Encoder.Encoder(height=height,
                                       width=width,

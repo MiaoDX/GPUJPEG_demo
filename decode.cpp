@@ -14,8 +14,8 @@
 #include <string>
 
 int main(int argc, char *argv[]) {
-  if (argc < 1) {
-    fprintf(stderr, "Please supply source image filename!\n");
+  if (argc < 2) {
+    fprintf(stderr, "Usage: command <file> <restart_interval>!\n");
     return -1;
   }
 
@@ -24,10 +24,11 @@ int main(int argc, char *argv[]) {
 
   // cv::imencode( ".jpg", ocv_img, encode_buf);  // only encode with
   // restart_interval can have potential speedup
-  FastEncoder fastEncoder;
+//   FastEncoder(int width = 1280, int height = 720, int restart_interval = 16, int device_id = 0) {
+  FastEncoder fastEncoder(ocv_img.size().width, ocv_img.size().height, atoi(argv[2]));
   std::vector<uint8_t> encode_buf = fastEncoder.encode(ocv_img);
 
-  FastDecoder fastDecoder;
+  FastDecoder fastDecoder(ocv_img.size().width, ocv_img.size().height, atoi(argv[2]));
 
   int iterate = 100;
 

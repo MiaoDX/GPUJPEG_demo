@@ -6,8 +6,16 @@ Time on Xavier with `1280x720` images
 
 | Method | Time ms (100 iterations) |
 | :-----| :---- | 
-| OpenCV | 2411  |
-| GPUJPEG | 160  |
+| OpenCV | 2390  |
+| GPUJPEG | 230  |
+
+For python version, with `restart_interval=16`. Note, the OpenCV python is faster than above result.
+
+| Method | Time ms (100 iterations) |
+| :-----| :---- | 
+| OpenCV | 799  |
+| GPUJPEG only | 221  |
+| GPUJPEG (py::bytes) | 286  |
 
 ## Usage
 

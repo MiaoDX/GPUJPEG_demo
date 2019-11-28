@@ -5,6 +5,9 @@
  *
  * TODO
  * Use OpenCV cv::cuda::GpuMat directly
+
+ * Note
+   restart_interval should be chosen according to image size, too small or too large will be bad
  */
 
 
@@ -34,10 +37,33 @@ public:
     }
 
 
-    std::vector<uint8_t> encode_npy(py::array_t<uint8_t> img_np){
-        auto data_buf = img_np.request();
-        return encode_direct( (uint8_t *) data_buf.ptr);
+    int encode_only(py::array_t<uint8_t> img_np){
+        auto xptr = img_np.data();
+        auto tmp = encode_direct( (uint8_t *) xptr );
+        return 0;
     }
+
+    py::bytes encode_npy(py::array_t<uint8_t> img_np){
+        auto xptr = img_np.data();
+        auto tmp = encode_direct( (uint8_t *) xptr );
+
+        // std::string str(tmp.begin(), tmp.end());
+        std::string str;
+        str.resize( tmp.size() );
+        std::copy( tmp.begin(), tmp.end(), str.begin() );
+
+        return py::bytes(str);
+    }
+
+    
+    // // std::vector<uint8_t> encode_npy(py::array_t<uint8_t> img_np){
+    // std::vector<unsigned char> encode_npy(py::array_t<uint8_t> img_np){
+    //     // auto data_buf = img_np.request();
+    //     // return encode_direct( (uint8_t *) data_buf.ptr);
+    //     // https://github.com/pybind/pybind11/issues/447
+    //     auto xptr = img_np.data();
+    //     return encode_direct( (uint8_t *) xptr );
+    // }
 
     std::vector<uint8_t> encode_direct(uint8_t* ocv_img_data){
         gpujpeg_encoder_input_set_image(&encoder_input, ocv_img_data);
@@ -46,7 +72,6 @@ public:
 
         if ( gpujpeg_encoder_encode(encoder, &param, &param_image, &encoder_input, &image_compressed, &image_compressed_size) != 0 ) {
             fprintf(stderr, "Failed to encode image!\n");
-            // return -1;
         }
 
         return std::vector<uint8_t>(image_compressed, image_compressed+image_compressed_size);
@@ -58,7 +83,7 @@ public:
         // }
     }
 
-    FastEncoder(int width = 1280, int height = 720, int device_id = 0){
+    FastEncoder(int width = 1280, int height = 720, int restart_interval = 16, int device_id = 0){
 
         fprintf(stdout, "GPU encoder init");
 
@@ -78,7 +103,7 @@ public:
         param_image.pixel_format = GPUJPEG_444_U8_P012;
 
         param.quality = 95;
-        param.restart_interval = 32;
+        param.restart_interval = restart_interval;
 
         int flags = GPUJPEG_VERBOSE;
         if ( gpujpeg_init_device(device_id, flags) != 0 ) {

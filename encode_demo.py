@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
-# FIXME, we the encode of cv2 is surprisingly quick, 
+# Note, the encode of cv2 is surprisingly quick
+# And restart_interval should be chosen according to image size
 
 import sys
 import cv2
@@ -11,25 +12,29 @@ import numpy as np
 sys.path.append('./build')
 import GPUJPEG_Encoder
 
-in_f='./images/a.png'
+# in_f='./images/a.png'
+if len(sys.argv) < 2:
+    print('Usage: python3 encode_demo.py <input_image_file>')
+    exit()
+in_f = sys.argv[1]
 
 im = cv2.imread(in_f)
 
-# gpu_encoder = GPUJPEG_Encoder.Encoder()
-# gpu_encoder = GPUJPEG_Encoder.Encoder(1280, 720, 0)
-# gpu_encoder = GPUJPEG_Encoder.Encoder(width=1280, height=720, device_id=0)
-gpu_encoder = GPUJPEG_Encoder.Encoder(height=720, width=1280)
+gpu_encoder = GPUJPEG_Encoder.Encoder(height=720, width=1280, restart_interval=16)
 
 N = 100
+
+t0 = time.perf_counter()
+for _ in range(N):
+    gpu_encoder.encode_only(im)
+print(f'GPU only encode time used:{(time.perf_counter()-t0)*1000: .2f} ms')
 
 t0 = time.perf_counter()
 for _ in range(N):
     buf = gpu_encoder.encode(im)
 print(f'GPU time used:{(time.perf_counter()-t0)*1000: .2f} ms')
 
-print(type(buf[0]))
-
-buf_npy = np.array(buf, dtype=np.uint8, copy=False).reshape(-1, 1)
+buf_npy = np.fromstring(buf, np.uint8)
 # im_b2 = cv2.imdecode(buf_npy, cv2.IMREAD_COLOR)
 im_b2 = cv2.imdecode(buf_npy, cv2.IMREAD_UNCHANGED)
 im_b2 = cv2.cvtColor(im_b2, cv2.COLOR_RGB2BGR)

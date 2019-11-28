@@ -17,7 +17,7 @@ main(int argc, char *argv[])
     }
 
     cv::Mat ocv_img = cv::imread( argv[1], cv::IMREAD_UNCHANGED );
-    cv::cvtColor(ocv_img, ocv_img, cv::COLOR_RGB2BGR);
+    cv::cvtColor(ocv_img, ocv_img, cv::COLOR_BGR2RGB);
     // cv::cuda::GpuMat ocv_img_gpu;
     // ocv_img_gpu.upload(ocv_img);
 

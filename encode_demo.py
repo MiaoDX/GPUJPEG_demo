@@ -20,14 +20,11 @@ in_f = sys.argv[1]
 
 im = cv2.imread(in_f)
 
-gpu_encoder = GPUJPEG_Encoder.Encoder(height=720, width=1280, restart_interval=16)
+gpu_encoder = GPUJPEG_Encoder.Encoder(height=720,
+                                      width=1280,
+                                      restart_interval=16)
 
 N = 100
-
-t0 = time.perf_counter()
-for _ in range(N):
-    gpu_encoder.encode_only(im)
-print(f'GPU only encode time used:{(time.perf_counter()-t0)*1000: .2f} ms')
 
 t0 = time.perf_counter()
 for _ in range(N):
@@ -38,7 +35,7 @@ buf_npy = np.fromstring(buf, np.uint8)
 # im_b2 = cv2.imdecode(buf_npy, cv2.IMREAD_COLOR)
 im_b2 = cv2.imdecode(buf_npy, cv2.IMREAD_UNCHANGED)
 im_b2 = cv2.cvtColor(im_b2, cv2.COLOR_RGB2BGR)
-cv2.imwrite('gpu_im.jpg', im_b2)
+cv2.imwrite('encode_gpu_py.jpg', im_b2)
 
 t0 = time.perf_counter()
 for _ in range(N):
@@ -48,7 +45,7 @@ print(f'CV2 time used:{(time.perf_counter()-t0)*1000: .2f} ms')
 buf_npy = np.array(buf_npy)
 # im_b = cv2.imdecode(buf_npy, cv2.IMREAD_COLOR)
 im_b = cv2.imdecode(buf_npy, cv2.IMREAD_UNCHANGED)
-cv2.imwrite('cv2_im.jpg', im_b)
+cv2.imwrite('encode_cv2_py.jpg', im_b)
 
 # print(im_b.shape)
 # print(im_b2.shape)

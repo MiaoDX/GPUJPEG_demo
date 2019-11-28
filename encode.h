@@ -1,5 +1,6 @@
 /**
- * Fast GPU JPEG encoder example class with [CESNET/GPUJPEG](https://github.com/CESNET/GPUJPEG)
+ * Fast GPU JPEG encoder example class with
+ [CESNET/GPUJPEG](https://github.com/CESNET/GPUJPEG)
  * compatible/call with OpenCV
  * DongxuMiao@DeepMotion.ai
  *
@@ -7,131 +8,93 @@
  * Use OpenCV cv::cuda::GpuMat directly
 
  * Note
-   restart_interval should be chosen according to image size, too small or too large will be bad
+   restart_interval should be chosen according to image size, too small or too
+ large will be bad
  */
-
 
 #include <libgpujpeg/gpujpeg.h>
 #include <libgpujpeg/gpujpeg_util.h>
 
 #include <opencv2/opencv.hpp>
 
-#include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 namespace py = pybind11;
 
+class FastEncoder {
+ public:
+  py::bytes encode_npy(py::array_t<uint8_t> img_np) {
+    gpujpeg_encoder_input_set_image(&encoder_input, (uint8_t*)img_np.data());
 
-class FastEncoder{
-public:
+    int image_compressed_size = 0;
 
-    int encode(cv::Mat ocv_img, std::vector<uint8_t> &buf){
-        return encode(ocv_img.data, buf);
+    if (gpujpeg_encoder_encode(encoder, &param, &param_image, &encoder_input, &image_compressed,
+                               &image_compressed_size) != 0) {
+      fprintf(stderr, "Failed to encode image!\n");
+    }
+    return py::bytes((const char*)image_compressed, image_compressed_size);
+  }
+
+  std::vector<uint8_t> encode(cv::Mat ocv_img) {
+    gpujpeg_encoder_input_set_image(&encoder_input, ocv_img.data);
+
+    int image_compressed_size = 0;
+
+    if (gpujpeg_encoder_encode(encoder, &param, &param_image, &encoder_input, &image_compressed,
+                               &image_compressed_size) != 0) {
+      fprintf(stderr, "Failed to encode image!\n");
     }
 
+    return std::vector<uint8_t>(image_compressed, image_compressed + image_compressed_size);
+  }
 
-    int encode(uint8_t* ocv_img_data, std::vector<uint8_t> &buf){
-        buf = encode_direct(ocv_img_data);
-        return 0;
+  FastEncoder(int width = 1280, int height = 720, int restart_interval = 16, int device_id = 0) {
+    fprintf(stdout, "GPU encoder init");
+
+    gpujpeg_set_default_parameters(&param);
+    gpujpeg_image_set_default_parameters(&param_image);
+
+    struct gpujpeg_image_parameters param_image_original;
+    gpujpeg_image_set_default_parameters(&param_image_original);
+
+    int component_range = 0;
+
+    param_image.width = width;
+    param_image.height = height;
+
+    param_image.color_space = GPUJPEG_RGB;
+    param_image.comp_count = 3;
+    param_image.pixel_format = GPUJPEG_444_U8_P012;
+
+    param.quality = 95;
+    param.restart_interval = restart_interval;
+
+    int flags = GPUJPEG_VERBOSE;
+    if (gpujpeg_init_device(device_id, flags) != 0) {
+      fprintf(stderr, "Init on gpu device error\n");
     }
 
-
-    int encode_only(py::array_t<uint8_t> img_np){
-        auto xptr = img_np.data();
-        auto tmp = encode_direct( (uint8_t *) xptr );
-        return 0;
+    if (param_image.width <= 0 || param_image.height <= 0) {
+      fprintf(stderr, "Image dimensions must be set to nonzero values!\n");
     }
 
-    py::bytes encode_npy(py::array_t<uint8_t> img_np){
-        auto xptr = img_np.data();
-        auto tmp = encode_direct( (uint8_t *) xptr );
-
-        // std::string str(tmp.begin(), tmp.end());
-        std::string str;
-        str.resize( tmp.size() );
-        std::copy( tmp.begin(), tmp.end(), str.begin() );
-
-        return py::bytes(str);
+    encoder = gpujpeg_encoder_create(NULL);
+    if (encoder == NULL) {
+      fprintf(stderr, "Failed to create encoder!\n");
     }
+  }
 
-    
-    // // std::vector<uint8_t> encode_npy(py::array_t<uint8_t> img_np){
-    // std::vector<unsigned char> encode_npy(py::array_t<uint8_t> img_np){
-    //     // auto data_buf = img_np.request();
-    //     // return encode_direct( (uint8_t *) data_buf.ptr);
-    //     // https://github.com/pybind/pybind11/issues/447
-    //     auto xptr = img_np.data();
-    //     return encode_direct( (uint8_t *) xptr );
-    // }
+  ~FastEncoder() {
+    gpujpeg_image_destroy(image_compressed);
+    gpujpeg_encoder_destroy(encoder);
+  }
 
-    std::vector<uint8_t> encode_direct(uint8_t* ocv_img_data){
-        gpujpeg_encoder_input_set_image(&encoder_input, ocv_img_data);
-
-        int image_compressed_size = 0;
-
-        if ( gpujpeg_encoder_encode(encoder, &param, &param_image, &encoder_input, &image_compressed, &image_compressed_size) != 0 ) {
-            fprintf(stderr, "Failed to encode image!\n");
-        }
-
-        return std::vector<uint8_t>(image_compressed, image_compressed+image_compressed_size);
-
-        // char* output = "save_direct.jpg"
-        // if ( gpujpeg_image_save_to_file(output, image_compressed, image_compressed_size) != 0 ) {
-        //     fprintf(stderr, "Failed to save image!\n");
-        //     return -1;
-        // }
-    }
-
-    FastEncoder(int width = 1280, int height = 720, int restart_interval = 16, int device_id = 0){
-
-        fprintf(stdout, "GPU encoder init");
-
-        gpujpeg_set_default_parameters(&param);
-        gpujpeg_image_set_default_parameters(&param_image);
-
-        struct gpujpeg_image_parameters param_image_original;
-        gpujpeg_image_set_default_parameters(&param_image_original);
-
-        int component_range = 0;
-
-        param_image.width = width;
-        param_image.height = height;
-
-        param_image.color_space = GPUJPEG_RGB;
-        param_image.comp_count = 3;
-        param_image.pixel_format = GPUJPEG_444_U8_P012;
-
-        param.quality = 95;
-        param.restart_interval = restart_interval;
-
-        int flags = GPUJPEG_VERBOSE;
-        if ( gpujpeg_init_device(device_id, flags) != 0 ) {
-            fprintf(stderr, "Init on gpu device error\n");
-            
-        }
-
-        if (param_image.width <= 0 || param_image.height <= 0) {
-            fprintf(stderr, "Image dimensions must be set to nonzero values!\n");
-        }
-
-        encoder = gpujpeg_encoder_create(NULL);
-        if ( encoder == NULL ) {
-            fprintf(stderr, "Failed to create encoder!\n");
-        }
-    }
-
-    ~FastEncoder(){
-        gpujpeg_image_destroy(image_compressed);
-        gpujpeg_encoder_destroy(encoder);
-    }
-
-private:
-
-    struct gpujpeg_parameters param;
-    struct gpujpeg_image_parameters param_image;
-    struct gpujpeg_encoder* encoder = NULL;
-    uint8_t* image_compressed = NULL;
-    struct gpujpeg_encoder_input encoder_input;
+ private:
+  struct gpujpeg_parameters param;
+  struct gpujpeg_image_parameters param_image;
+  struct gpujpeg_encoder* encoder = NULL;
+  uint8_t* image_compressed = NULL;
+  struct gpujpeg_encoder_input encoder_input;
 };
-

@@ -41,6 +41,7 @@ git clone https://github.com/CESNET/GPUJPEG.git
 # Build this demo (CMake)
 # Please change the OpenCV (and libgpujpeg) path
 git clone https://github.com/MiaoDX/GPUJPEG_demo.git
+git submodule update --init
 ...
 
 ./demo_benchmark.sh

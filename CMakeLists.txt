@@ -21,22 +21,23 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 #find_package( gpujpeg REQUIRED )
 include_directories( /usr/local/include/libgpujpeg/ )
-# link_directories( /usr/local/lib )
+include_directories( ./include )
 
-cuda_add_executable( encode encode.cpp )
+# cpp example
+cuda_add_executable( encode src/encode.cpp )
 target_link_libraries( encode ${OpenCV_LIBS} gpujpeg)
 
-cuda_add_executable( decode decode.cpp )
+cuda_add_executable( decode src/decode.cpp )
 target_link_libraries( decode ${OpenCV_LIBS} gpujpeg)
 
 # python binding
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/third_party/pybind11 )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/third_party/pybind11/include )
 
-cuda_add_library(GPUJPEG_Encoder SHARED encode_pybind.cpp )
+cuda_add_library(GPUJPEG_Encoder SHARED src/encode_pybind.cpp )
 target_link_libraries(GPUJPEG_Encoder ${OpenCV_LIBS} gpujpeg)
 set_target_properties(GPUJPEG_Encoder PROPERTIES PREFIX "")
 
-cuda_add_library(GPUJPEG_Decoder SHARED decode_pybind.cpp )
+cuda_add_library(GPUJPEG_Decoder SHARED src/decode_pybind.cpp )
 target_link_libraries(GPUJPEG_Decoder ${OpenCV_LIBS} gpujpeg)
 set_target_properties(GPUJPEG_Decoder PROPERTIES PREFIX "")

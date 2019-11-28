@@ -1,14 +1,12 @@
 # Faster JPEG encode/decode processing
 
-*OpenCV default JPEG compression is way too slow, we need one faster implement*
+*OpenCV default JPEG compression/decompression is way too slow, we need one faster implement*
 
+**`restart_interval` matters as [GPU parallel processing relaying on it, CESNET/GPUJPEG/issues/29](https://github.com/CESNET/GPUJPEG/issues/29). Please tweak it for specific image size. (8, 16, 32) can be used for `1280x720`.**
 
 ## Benchmark
 
-
-* `restart_interval` matters, please tweak it for your specific image size. (8, 16, 32) can be used for `1280x720`. All test below use `16`.
-
-Time on Xavier with `1280x720` images, *Note, the speed varies for different running, however, the speedup ratio is still satisfying.*
+Time on Xavier with `1280x720` images and `restart_interval=16`. *Note, the speed varies for different running, however, the speedup ratio is still satisfying.*
 
 ``` bash
 ./demo_benchmark.sh
@@ -45,7 +43,6 @@ git clone https://github.com/CESNET/GPUJPEG.git
 git clone https://github.com/MiaoDX/GPUJPEG_demo.git
 ...
 
-
 ./demo_benchmark.sh
 ```
 
@@ -55,10 +52,16 @@ git clone https://github.com/MiaoDX/GPUJPEG_demo.git
   - Current choice, open-source, quick enough
 * [Fastvideo](https://www.fastcompression.com/)
   - Close-sourced SDK, many other functions
-  - Watermark with trial version
+  - Watermark with the trial version
 * nvJPEG
   - Not available for Xavier currently (20191016)
 
+## Changelog
+
+* 2019.11.28, `decode`, python binding, and benchmark
+* 2019.11.27, refactoring and python binding for `encode` with pybind
+* 2019.10.16, initial version, example codes for `encode`
+
 ## TODO
 
-* Use OpenCV cv::cuda::GpuMat directly
+* Use OpenCV `cv::cuda::GpuMat` directly

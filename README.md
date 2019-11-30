@@ -6,30 +6,32 @@
 
 ## Benchmark
 
-Time on Xavier with `1280x720` images and `restart_interval=16`. *Note, the speed varies for different running, however, the speedup ratio is still satisfying.*
+Time with `1280x720` images and `restart_interval=16` on Xavier and Allienware(i7-7820HK@2.90GHz×8, GeForce GTX 1080 with Max-Q). *Note, the speed varies for different running, however, the speedup ratio is still satisfying.*
 
 ``` bash
 ./demo_benchmark.sh
 ```
 
+**Time ms (100 iterations)**
+
 C++ version:
 
-| Method | Time ms (100 iterations) |
-| :-----| :---- | 
-| OpenCV Encode | 2369  |
-| GPUJPEG Encode | 245  |
-| OpenCV Decode | 1884  |
-| GPUJPEG Decode | 429  |
+| Method | Xavier | GTX1080(Max-Q) |
+| :-----| :---- | :---- |
+| OpenCV Encode | 2369  | 739 |
+| GPUJPEG Encode | 245  | 152 |
+| OpenCV Decode | 1884  | 829 |
+| GPUJPEG Decode | 429  | 206 |
 
 
 Python version:
 
-| Method | Time ms (100 iterations) |
-| :-----| :---- | 
-| OpenCV Encode | 791  |
-| GPUJPEG Encode | 242  |
-| OpenCV Decode | 1269  |
-| GPUJPEG Decode | 492  |
+| Method |  Xavier | GTX1080(Max-Q) |
+| :-----| :---- |  :---- |
+| OpenCV Encode | 791  | 704 |
+| GPUJPEG Encode | 242  | 154 |
+| OpenCV Decode | 1269  | 1092 |
+| GPUJPEG Decode | 492  | 263 |
 
 ## Usage
 

@@ -3,21 +3,22 @@ project(cuda_jpeg_encode)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-#find_package(CUDA)
-find_package(PythonLibs 3.6 REQUIRED)
-include_directories(${PYTHON_INCLUDE_DIRS})
-
-
 # find_package( OpenCV REQUIRED )
-# include( $ENV{OpenCV3_DIR}/OpenCVConfig.cmake )
-include(/data/dinghao/MyLibs/opencv_cu100_jp_turbo/share/OpenCV/OpenCVConfig.cmake)
-
+#include( $ENV{OpenCV3_DIR}/OpenCVConfig.cmake )
+include(/home/deepmotion/dongxu/libs/ocv/install/share/OpenCV/OpenCVConfig.cmake)
+#include(/data/dinghao/MyLibs/opencv_cu100_jp_turbo/share/OpenCV/OpenCVConfig.cmake)
 message( STATUS "OpenCV library status:" )
 message( STATUS "    version: ${OpenCV_VERSION}" )
 message( STATUS "    libraries: ${OpenCV_LIBS}" )
 message( STATUS "    include path: ${OpenCV_INCLUDE_DIRS}" )
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
+#find_package(CUDA)
+set(py_root "/home/deepmotion/miniconda3/envs/t1/")
+set(PYTHON_LIBRARY "${py_root}/lib/libpython3.6m.so")
+set(PYTHON_INCLUDE "${py_root}/include/")
+find_package(PythonLibs 3.6 REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
 
 #find_package( gpujpeg REQUIRED )
 include_directories( /usr/local/include/libgpujpeg/ )
